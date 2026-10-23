@@ -1,0 +1,41 @@
+
+name: Analyze Xbox Executable
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download repository files
+        uses: actions/checkout@v4
+
+      - name: Inspect default.xbe
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(find . -type f -iname 'default.xbe' -print -quit)"
+          if [ -z "$FILE" ]; then
+            echo "ERROR: default.xbe not found"
+            exit 1
+          fi
+          echo "File found: $FILE"
+          ls -lh "$FILE"
+          sha256sum "$FILE"
+          python3 - "$FILE" <<'PY'
+          import sys, hashlib
+          from pathlib import Path
+
+          p = Path(sys.argv[1])
+          data = p.read_bytes()
+          print("Size:", len(data), "bytes")
+          print("Header:", data[:4].hex(" ").upper())
+          print("XBE signature:", "VALID" if data[:4] == b"XBEH" else "NOT RECOGNIZED")
+          print("First 64 bytes:", data[:64].hex(" "))
+          print("SHA-256:", hashlib.sha256(data).hexdigest())
+          PY
+          
