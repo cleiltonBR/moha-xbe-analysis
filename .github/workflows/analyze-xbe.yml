@@ -48,14 +48,16 @@ jobs:
           cert_va = u32(0x118)
           section_count = u32(0x11C)
           section_table_va = u32(0x120)
-          entry_va = u32(0x128)
+          encoded_entry = u32(0x128)
+          entry_va = encoded_entry ^ 0xA8FC57AB
 
           print("\n--- XBE HEADER ---")
           print(f"Base address:       0x{base:08X}")
           print(f"Header size:        0x{headers_size:X}")
           print(f"Image size:         0x{image_size:X}")
           print(f"Certificate VA:     0x{cert_va:08X}")
-          print(f"Entry point VA:     0x{entry_va:08X}")
+          print(f"Encoded entry point: 0x{encoded_entry:08X}")
+          print(f"Decoded entry point: 0x{entry_va:08X}")
           print(f"Section count:      {section_count}")
           print(f"Section table VA:   0x{section_table_va:08X}")
 
