@@ -110,5 +110,5 @@ jobs:
                   f"raw_offset=0x{raw:X} raw_size=0x{rsize:X} "
                   f"name_VA=0x{name_va:08X}"
                      )
-PY
+          PY
           
