@@ -61,17 +61,42 @@ jobs:
           print(f"Section count:      {section_count}")
           print(f"Section table VA:   0x{section_table_va:08X}")
 
+            
           table_off = section_table_va - base
-          entry_off = entry_va - base
-
-          print(f"Entry file offset:  0x{entry_off:X}")
-          if entry_off >= len(d):
-              print("WARNING: Entry address does not map inside file directly.")
 
           if section_count > 4096:
               raise SystemExit("ERROR: Implausible section count")
           if table_off < 0 or table_off + section_count * 0x38 > len(d):
               raise SystemExit("ERROR: Section table outside file")
+
+          print("\n--- ENTRY POINT VALIDATION ---")
+          print(f"Decoded entry VA: 0x{entry_va:08X}")
+
+          entry_found = False
+
+          for i in range(section_count):
+              o = table_off + i * 0x38
+              flags, va, vsize, raw, rsize, name_va = struct.unpack_from(
+                  "<6I", d, o
+              )
+
+              if va <= entry_va < va + vsize:
+                  entry_found = True
+                  entry_off = raw + (entry_va - va)
+
+                  print(f"Section index: {i}")
+                  print(f"Section VA:    0x{va:08X}")
+                  print(f"Section flags: 0x{flags:08X}")
+                  print(f"Entry offset:  0x{entry_off:X}")
+
+                  if entry_off < len(d) and entry_off < raw + rsize:
+                      print("Entry offset is inside raw section data.")
+                  else:
+                      print("WARNING: Entry offset is outside raw section data.")
+                  break
+
+          if not entry_found:
+              print("WARNING: Entry VA does not map to a section.")
 
           print("\n--- SECTIONS ---")
           for i in range(section_count):
@@ -84,6 +109,6 @@ jobs:
                   f"VA=0x{va:08X} virtual_size=0x{vsize:X} "
                   f"raw_offset=0x{raw:X} raw_size=0x{rsize:X} "
                   f"name_VA=0x{name_va:08X}"
-              )
-          PY
+                     )
+PY
           
